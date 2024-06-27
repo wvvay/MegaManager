@@ -1,4 +1,15 @@
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using MegaManager.Areas.Identity.Data;
+
+
 var builder = WebApplication.CreateBuilder(args);
+var connectionString = builder.Configuration.GetConnectionString("DBContextMegaManagerConnection") ?? throw new InvalidOperationException("Connection string 'DBContextMegaManagerConnection' not found.");
+
+builder.Services.AddDbContext<DBContextMegaManager>(options => options.UseNpgsql(connectionString));
+
+builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<DBContextMegaManager>();
+
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -24,4 +35,6 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
+
+app.MapRazorPages();
 app.Run();
