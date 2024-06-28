@@ -5,70 +5,106 @@
 
 <style>
     table {
-        border-collapse: collapse; /* Объединяем границы ячеек в одну */
-        width: 100%; /* Ширина таблицы 100% от родительского контейнера */
+        border-collapse: collapse;
+        width: auto;
+        margin: 0 auto;
+        display: table;
     }
 
     th, td {
-        border: 1px solid black; /* Устанавливаем черную границу толщиной 1 пиксель */
-        padding: 8px; /* Добавляем отступы вокруг содержимого ячеек */
-        text-align: left; /* Выравнивание текста по левому краю */
+        padding: 8px;
+        text-align: left;
+        vertical-align: middle;
     }
 
     th {
-        background-color: #f2f2f2; /* Цвет фона для заголовков */
+        background-color: #f2f2f2;
+    }
+
+    .default-button {
+        background: none;
+        border: none;
+        cursor: pointer;
     }
 </style>
 
 
+<body>
+    <div style="text-align: center;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Address</th>
+                    <th>Password</th>
+                    <th></th>
+                </tr>
+            </thead>
 
-<table>
-    <thead>
-        <tr>
-            <th>Address</th>
-            <th>Password</th>
-            <th>Copy</th>
-            <th>Delete</th>
-        </tr>
-    </thead>
+            <tbody>
+                @foreach (var entry in Model)
+                {
+                    <tr>
+                        <td id="addressField">
+                            <span>@entry.Address</span>
 
-    <tbody>
-        @foreach (var entry in Model)
-        {
-            <tr>
-                <td>@entry.Address</td>
-                <td>@entry.Password</td>
+                            <button class="default-button" onclick="copyText(this, 'address')">
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                     height="24px"
+                                     viewBox="0 0 24 24"
+                                     width="24px"
+                                     fill="black">
+                                    <path d="M0 0h24v24H0V0z" fill="none" />
+                                    <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm-1 4H8c-1.1 0-1.99.9-1.99 2L6 21c0 1.1.89 2 1.99 2H19c1.1 0 2-.9 2-2V11l-6-6zM8 21V7h6v5h5v9H8z" />
+                                </svg>
+                            </button>
+                        </td>
 
-                <td>
-                    <button>
-                        <svg xmlns="http://www.w3.org/2000/svg"
-                             height="24px"
-                             viewBox="0 0 24 24"
-                             width="24px"
-                             fill="black">
+                        <td id="passwordField">
+                            <span>@entry.Password</span>
 
-                            <path d="M0 0h24v24H0V0z" fill="none"/>
+                            <button class="default-button" onclick="copyText(this, 'password')">
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                     height="24px"
+                                     viewBox="0 0 24 24"
+                                     width="24px"
+                                     fill="black">
+                                    <path d="M0 0h24v24H0V0z" fill="none"/>
+                                    <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm-1 4H8c-1.1 0-1.99.9-1.99 2L6 21c0 1.1.89 2 1.99 2H19c1.1 0 2-.9 2-2V11l-6-6zM8 21V7h6v5h5v9H8z"/>
+                                </svg>
+                            </button>
+                        </td>
 
-                            <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm-1 4H8c-1.1 0-1.99.9-1.99 2L6 21c0 1.1.89 2 1.99 2H19c1.1 0 2-.9 2-2V11l-6-6zM8 21V7h6v5h5v9H8z"/>
-                        </svg>
-                    </button>
-                </td>
+                        <td>
+                            <form asp-action="Delete" asp-route-id="@entry.Id" method="post">
+                                <button type="submit" class="btn btn-danger">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</body>
 
-                <td>
-                    <button>
-                        <svg xmlns="http://www.w3.org/2000/svg"
-                             height="24px"
-                             viewBox="0 0 24 24"
-                             width="24px"
-                             fill="black">
+<script>
+    function copyText(button, type) {
+        var cell = button.parentElement; // Get the parent <td> of the clicked button
+        var textElement = cell.querySelector("span"); // Find the <span> within the <td>
+        var textToCopy = textElement.innerText.trim(); // Get the text content and trim any whitespace
 
-                            <path d="M0 0h24v24H0V0z" fill="none"/>
+        // Create a temporary input element
+        var tempInput = document.createElement("input");
+        tempInput.value = textToCopy;
+        document.body.appendChild(tempInput);
 
-                            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/>
-                        </svg>
-                    </button>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+        // Select the text in the temporary input element
+        tempInput.select();
+        tempInput.setSelectionRange(0, 99999); // For mobile devices
+
+        // Copy the text to the clipboard
+        document.execCommand("copy");
+
+        // Remove the temporary input element
+        document.body.removeChild(tempInput);
+    }
+</script>
