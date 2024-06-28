@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Entry>
+﻿@model List<Entry>
 @{
     ViewData["Title"] = "Entries";
 }
@@ -25,10 +25,10 @@
 <table>
     <thead>
         <tr>
-            <th>Address</th>
-            <th>Password</th>
-            <th>Copy</th>
-            <th>Delete</th>
+            <th>URL</th>
+            <th>LOGIN</th>
+            <th>PASSWORD</th>
+            <th>NOTES</th>
         </tr>
     </thead>
 
@@ -36,8 +36,10 @@
         @foreach (var entry in Model)
         {
             <tr>
-                <td>@entry.Address</td>
+                <td>@entry.URL</td>
+                <td>@entry.Login</td>
                 <td>@entry.Password</td>
+                <td>@entry.Notes</td>
 
                 <td>
                     <button>

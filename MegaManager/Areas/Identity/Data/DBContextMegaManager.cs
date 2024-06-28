@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using MegaManager.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -11,10 +12,15 @@ public class DBContextMegaManager: IdentityDbContext<ApplicationUser>
     {
 
     }
-
+    public DbSet<Entry> Entries { get; set; }
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+        // Настройка связи между Entry и ApplicationUser
+        builder.Entity<Entry>()
+            .HasOne(e => e.User)
+            .WithMany()
+            .HasForeignKey(e => e.IdUser);
         builder.ApplyConfiguration(new ApplicationUserEntityConfiguration());
     }
 }
