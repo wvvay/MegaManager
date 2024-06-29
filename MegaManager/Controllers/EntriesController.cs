@@ -1,6 +1,5 @@
 ﻿using MegaManager.Areas.Identity.Data;
 using MegaManager.Models;
-using MegaManager.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -14,8 +13,6 @@ namespace MegaManager.Controllers
         private readonly DBContextMegaManager _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<EntriesController> _logger;
-        private ISession _session => HttpContext.Session;
-        private const string EntriesKey = "Entries";
 
         public EntriesController(DBContextMegaManager context, UserManager<ApplicationUser> userManager, ILogger<EntriesController> logger)
         {
@@ -42,21 +39,51 @@ namespace MegaManager.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("URL,Login,Password,Notes")] Entry entry)
         {
-                try
-                {
-                    entry.IdUser = _userManager.GetUserId(User);
-                    _context.Add(entry);
-                    await _context.SaveChangesAsync();
-                    _logger.LogInformation("Entry saved successfully.");
-                    return RedirectToAction(nameof(Index));
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "An error occurred while saving the entry.");
-                }
+            try
+            {
+                entry.IdUser = _userManager.GetUserId(User);
+                _context.Add(entry);
+                await _context.SaveChangesAsync();
+                _logger.LogInformation("Entry saved successfully.");
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while saving the entry.");
+            }
             return View(entry);
         }
 
-    }
+        // POST: Entries/Delete
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
+        {
+            try
+            {
+                var entry = await _context.Entries.FindAsync(id);
+                if (entry == null)
+                {
+                    _logger.LogWarning("Entity with ID {Id} not found.", id);
+                    return NotFound();
+                }
 
+                if (entry.IdUser != _userManager.GetUserId(User))
+                {
+                    _logger.LogWarning("UserId {Id} trying delete foreign entry", _userManager.GetUserId(User));
+                    return NotFound();
+                }
+
+                _context.Entries.Remove(entry);
+                await _context.SaveChangesAsync();
+                _logger.LogInformation("Entity with ID {Id} has been deleted.", id);
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while deleting entity with ID {Id}.", id);
+                return NotFound();
+            }
+        }
+    }
 }
