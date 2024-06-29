@@ -1,32 +1,34 @@
 ﻿@model MegaManager.Models.Entry
 
 @{
-    ViewData["Title"] = "Создать запись";
+    ViewData["Title"] = "Update Entry";
 }
 
-<h2>Добавить запись</h2>
+<h2>Update Entry</h2>
+
+<h4>Entry</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Create">
+        <form asp-action="Update">
             <div class="form-group">
                 <label asp-for="URL" class="control-label"></label>
-                <input asp-for="URL" class="form-control" />
+                <input asp-for="URL" class="form-control" value="@Model.URL" />
                 <span asp-validation-for="URL" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Login" class="control-label"></label>
-                <input asp-for="Login" class="form-control" />
+                <input asp-for="Login" class="form-control" value="@Model.Login" />
                 <span asp-validation-for="Login" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Password" class="control-label"></label>
-                <input asp-for="Password" class="form-control" />
+                <input asp-for="Password" class="form-control" value="@Model.Password" />
                 <span asp-validation-for="Password" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Notes" class="control-label"></label>
-                <input asp-for="Notes" class="form-control" />
+                <input asp-for="Notes" class="form-control" value="@Model.Notes" />
                 <span asp-validation-for="Notes" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -37,7 +39,7 @@
 </div>
 
 <div>
-    <a asp-action="Index">Верунться назад</a>
+    <a asp-action="Index">Back to List</a>
 </div>
 
 @section Scripts {

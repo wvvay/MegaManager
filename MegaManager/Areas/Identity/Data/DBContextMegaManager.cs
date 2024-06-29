@@ -43,5 +43,12 @@ public class ApplicationUserEntityConfiguration: IEntityTypeConfiguration<Applic
     {
         builder.Property(x => x.FirstName).HasMaxLength(100);
         builder.Property(x => x.LastName).HasMaxLength(100);
+
+
+    }
+    public void Configure(EntityTypeBuilder<Entry> builder)
+    {
+        builder.Property(x => x.Notes).HasMaxLength(256);
+
     }
 }

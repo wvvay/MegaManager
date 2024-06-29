@@ -57,28 +57,6 @@ namespace MegaManager.Controllers
             return View(entry);
         }
 
-        // GET: Entries/Delete/5
-        public IActionResult Delete(int? id)
-        {
-            if (id == null)
-                return NotFound();
-            
-
-            // Получаем данные Entries из сессии
-            var entries = _session.GetObject<List<Entry>>(EntriesKey) ?? new List<Entry>();
-
-            var entryToRemove = entries.FirstOrDefault(e => e.Id == id);
-            if (entryToRemove == null)
-                return NotFound();
-            
-
-            entries.Remove(entryToRemove);
-
-            // Сохраняем обновленный список Entries в сессию
-            _session.SetObject(EntriesKey, entries);
-
-            return RedirectToAction(nameof(Index));
-        }
-
     }
+
 }
