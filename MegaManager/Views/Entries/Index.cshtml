@@ -1,48 +1,60 @@
 ﻿@model IEnumerable<Entry>
 @{
-    ViewData["Title"] = "Entries";
+
 }
 
 <style>
     table {
         border-collapse: collapse;
-        width: auto;
+        width: 100%;
+        table-layout: auto;
         margin: 0 auto;
         display: table;
     }
 
     th, td {
+        min-width: 20%;
         padding: 8px;
         text-align: left;
-        vertical-align: middle;
+        vertical-align: top;
     }
 
     th {
         background-color: #f2f2f2;
+        vertical-align: middle;
     }
 
-    .default-button {
+    .default-button,
+    .table-button {
         background: none;
         border: none;
         cursor: pointer;
+    }
+
+    .table-button {
+        text-align: right;
+    }
+
+    .table-column{
+        text-align: right;
     }
 </style>
 
 
 <body>
-    <h2>Entries</h2>
-    <p>
-        <a class="btn btn-primary" asp-action="Create">Add Entry</a>
-    </p>
     <div style="text-align: center;">
         <table>
             <thead>
                 <tr>
-                    <th>URL</th>
-                    <th>Login</th>
-                    <th>Password</th>
-                    <th>Notes</th>
-                    <th></th>
+                    <th>Сайт</th>
+                    <th>Логин</th>
+                    <th>Пароль</th>
+                    <th>Заметка</th>
+                    <th class="table-column">
+                        <div>
+                            <a class="btn btn-primary" asp-action="Create">Добавить</a>
+                        </div>
+                    </th>
                 </tr>
             </thead>
 
@@ -50,13 +62,8 @@
                 @foreach (var entry in Model)
                 {
                     <tr>
-                        <td id="addressField">
-                            <span>@entry.URL</span>
-                            <span>@entry.Login</span>
-                            <span>@entry.Password</span>
-                            <span>@entry.Notes</span>
-
-                            <button class="default-button" onclick="copyText(this, 'address')">
+                        <td id="urlField">
+                            <button class="table-button" onclick="copyText(this, 'url')">
                                 <svg xmlns="http://www.w3.org/2000/svg"
                                      height="24px"
                                      viewBox="0 0 24 24"
@@ -66,12 +73,29 @@
                                     <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm-1 4H8c-1.1 0-1.99.9-1.99 2L6 21c0 1.1.89 2 1.99 2H19c1.1 0 2-.9 2-2V11l-6-6zM8 21V7h6v5h5v9H8z" />
                                 </svg>
                             </button>
+
+                            <span>@entry.URL</span>
+                        </td>
+                        
+                        <td id="loginField">
+                            <span>@entry.Login</span>
+
+@*                          <button class="table-button" onclick="copyText(this, 'login')">
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                     height="24px"
+                                     viewBox="0 0 24 24"
+                                     width="24px"
+                                     fill="black">
+                                    <path d="M0 0h24v24H0V0z" fill="none" />
+                                    <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm-1 4H8c-1.1 0-1.99.9-1.99 2L6 21c0 1.1.89 2 1.99 2H19c1.1 0 2-.9 2-2V11l-6-6zM8 21V7h6v5h5v9H8z" />
+                                </svg>
+                            </button> *@
                         </td>
 
                         <td id="passwordField">
                             <span>@entry.Password</span>
 
-                            <button class="default-button" onclick="copyText(this, 'password')">
+@*                          <button class="table-button" onclick="copyText(this, 'password')">
                                 <svg xmlns="http://www.w3.org/2000/svg"
                                      height="24px"
                                      viewBox="0 0 24 24"
@@ -80,12 +104,18 @@
                                     <path d="M0 0h24v24H0V0z" fill="none"/>
                                     <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm-1 4H8c-1.1 0-1.99.9-1.99 2L6 21c0 1.1.89 2 1.99 2H19c1.1 0 2-.9 2-2V11l-6-6zM8 21V7h6v5h5v9H8z"/>
                                 </svg>
-                            </button>
+                            </button> *@
+                        </td>
+                        
+                        <td id="notesField"
+                            style="max-width: 20vw; word-wrap: break-word;">
+                            <span>@entry.Notes</span>
                         </td>
 
-                        <td>
+                        <td class="table-column">
                             <form asp-action="Delete" asp-route-id="@entry.Id" method="post">
-                                <button type="submit" class="btn btn-danger">Delete</button>
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-danger">Удалить</button>
                             </form>
                         </td>
                     </tr>
