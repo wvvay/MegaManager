@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MegaManager.Migrations
 {
     [DbContext(typeof(DBContextMegaManager))]
-    [Migration("20240628180350_Initial")]
-    partial class Initial
+    [Migration("20240629113752_InitialMigaration")]
+    partial class InitialMigaration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -46,13 +46,11 @@ namespace MegaManager.Migrations
 
                     b.Property<string>("FirstName")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasColumnType("text");
 
                     b.Property<string>("LastName")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasColumnType("text");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("boolean");
@@ -116,7 +114,6 @@ namespace MegaManager.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Notes")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Password")
@@ -272,13 +269,11 @@ namespace MegaManager.Migrations
 
             modelBuilder.Entity("MegaManager.Models.Entry", b =>
                 {
-                    b.HasOne("MegaManager.Areas.Identity.Data.ApplicationUser", "User")
+                    b.HasOne("MegaManager.Areas.Identity.Data.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("IdUser")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

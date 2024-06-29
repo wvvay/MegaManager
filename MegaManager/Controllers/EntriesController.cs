@@ -12,23 +12,21 @@ namespace MegaManager.Controllers
     {
         private readonly DBContextMegaManager _context;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ILogger<EntriesController> _logger;
 
-        public EntriesController(DBContextMegaManager context, UserManager<ApplicationUser> userManager)
+        public EntriesController(DBContextMegaManager context, UserManager<ApplicationUser> userManager, ILogger<EntriesController> logger)
         {
             _context = context;
             _userManager = userManager;
+            _logger = logger;
         }
-
 
         // GET: Entries
         public async Task<IActionResult> Index()
         {
             var userId = _userManager.GetUserId(User);
-            var entries = await _context.Entries
-                .Where(e => e.IdUser == userId)
-                .ToListAsync();
+            var entries = await _context.Entries.Where(e => e.IdUser == userId).ToListAsync();
             return View(entries);
-
         }
 
         // GET: Entries/Create
@@ -42,24 +40,19 @@ namespace MegaManager.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("URL,Login,Password,Notes")] Entry entry)
         {
-            if (ModelState.IsValid)
-            {
                 try
                 {
                     entry.IdUser = _userManager.GetUserId(User);
                     _context.Add(entry);
                     await _context.SaveChangesAsync();
+                    _logger.LogInformation("Entry saved successfully.");
                     return RedirectToAction(nameof(Index));
                 }
-                catch (DbUpdateException ex)
+                catch (Exception ex)
                 {
-                    // Log the exception or examine it to understand the cause
-                    var errorMessage = $"Error saving entry: {ex.Message}";
-                    ModelState.AddModelError("", errorMessage);
+                    _logger.LogError(ex, "An error occurred while saving the entry.");
                 }
-            }
             return View(entry);
         }
-
     }
 }

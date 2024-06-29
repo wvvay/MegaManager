@@ -16,12 +16,24 @@ public class DBContextMegaManager: IdentityDbContext<ApplicationUser>
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+
+        // Настройки для таблицы Entries
+        builder.Entity<Entry>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.Property(e => e.IdUser).IsRequired();
+            entity.Property(e => e.URL).IsRequired();
+            entity.Property(e => e.Login).IsRequired();
+            entity.Property(e => e.Password).IsRequired();
+            entity.Property(e => e.Notes).IsRequired(false);
+
+        });
         // Настройка связи между Entry и ApplicationUser
         builder.Entity<Entry>()
-            .HasOne(e => e.User)
+            .HasOne<ApplicationUser>()
             .WithMany()
             .HasForeignKey(e => e.IdUser);
-        builder.ApplyConfiguration(new ApplicationUserEntityConfiguration());
     }
 }
 
