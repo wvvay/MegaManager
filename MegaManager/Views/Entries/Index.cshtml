@@ -38,8 +38,10 @@
         <table>
             <thead>
                 <tr>
-                    <th>Address</th>
+                    <th>URL</th>
+                    <th>Login</th>
                     <th>Password</th>
+                    <th>Notes</th>
                     <th></th>
                 </tr>
             </thead>
@@ -49,7 +51,10 @@
                 {
                     <tr>
                         <td id="addressField">
-                            <span>@entry.Address</span>
+                            <span>@entry.URL</span>
+                            <span>@entry.Login</span>
+                            <span>@entry.Password</span>
+                            <span>@entry.Notes</span>
 
                             <button class="default-button" onclick="copyText(this, 'address')">
                                 <svg xmlns="http://www.w3.org/2000/svg"

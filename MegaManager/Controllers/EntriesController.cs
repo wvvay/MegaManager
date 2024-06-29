@@ -31,13 +31,12 @@ namespace MegaManager.Controllers
             var entries = await _context.Entries.Where(e => e.IdUser == userId).ToListAsync();
             return View(entries);
         }
-                new Entry { Address = "example1@example.com", Password = "password1" },
         // GET: Entries/Create
         public IActionResult Create()
         {
             return View();
         }
-                new Entry { Address = "example1@example.com", Password = "password1" },
+
         // POST: Entries/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -56,12 +55,6 @@ namespace MegaManager.Controllers
                     _logger.LogError(ex, "An error occurred while saving the entry.");
                 }
             return View(entry);
-                new Entry { Address = "example2@example.com", Password = "password2" },
-                new Entry { Address = "example3@example.com", Password = "password3" }
-            };
-
-
-            return View(entries);
         }
 
         // GET: Entries/Delete/5
