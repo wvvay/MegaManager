@@ -1,5 +1,6 @@
 ﻿using MegaManager.Areas.Identity.Data;
 using MegaManager.Models;
+using MegaManager.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -13,6 +14,8 @@ namespace MegaManager.Controllers
         private readonly DBContextMegaManager _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<EntriesController> _logger;
+        private ISession _session => HttpContext.Session;
+        private const string EntriesKey = "Entries";
 
         public EntriesController(DBContextMegaManager context, UserManager<ApplicationUser> userManager, ILogger<EntriesController> logger)
         {
@@ -28,13 +31,13 @@ namespace MegaManager.Controllers
             var entries = await _context.Entries.Where(e => e.IdUser == userId).ToListAsync();
             return View(entries);
         }
-
+                new Entry { Address = "example1@example.com", Password = "password1" },
         // GET: Entries/Create
         public IActionResult Create()
         {
             return View();
         }
-
+                new Entry { Address = "example1@example.com", Password = "password1" },
         // POST: Entries/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -53,6 +56,36 @@ namespace MegaManager.Controllers
                     _logger.LogError(ex, "An error occurred while saving the entry.");
                 }
             return View(entry);
+                new Entry { Address = "example2@example.com", Password = "password2" },
+                new Entry { Address = "example3@example.com", Password = "password3" }
+            };
+
+
+            return View(entries);
         }
+
+        // GET: Entries/Delete/5
+        public IActionResult Delete(int? id)
+        {
+            if (id == null)
+                return NotFound();
+            
+
+            // Получаем данные Entries из сессии
+            var entries = _session.GetObject<List<Entry>>(EntriesKey) ?? new List<Entry>();
+
+            var entryToRemove = entries.FirstOrDefault(e => e.Id == id);
+            if (entryToRemove == null)
+                return NotFound();
+            
+
+            entries.Remove(entryToRemove);
+
+            // Сохраняем обновленный список Entries в сессию
+            _session.SetObject(EntriesKey, entries);
+
+            return RedirectToAction(nameof(Index));
+        }
+
     }
 }
