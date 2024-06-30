@@ -70,16 +70,39 @@
         transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
     }
 
-        .notification.show {
-            visibility: visible;
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
-            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
-        }
+    .notification.show {
+        visibility: visible;
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+        transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+    }
 
     .form-container {
         display: flex;
-        justify-content: space-evenly;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .material-icons {
+        font-family: 'Material Icons';
+        font-weight: normal;
+        font-style: normal;
+        font-size: 24px; /* Preferred icon size */
+        display: inline-block;
+        line-height: 1;
+        text-transform: none;
+        letter-spacing: normal;
+        word-wrap: normal;
+        white-space: nowrap;
+        direction: ltr;
+        /* Support for all WebKit browsers. */
+        -webkit-font-smoothing: antialiased;
+        /* Support for Safari and Chrome. */
+        text-rendering: optimizeLegibility;
+        /* Support for Firefox. */
+        -moz-osx-font-smoothing: grayscale;
+        /* Support for IE. */
+        font-feature-settings: 'liga';
     }
 
 </style>
@@ -127,13 +150,18 @@
                         </td>
                         <td class="table-column">
                             <div class="form-container">
+                                
                                 <form asp-action="Update" asp-route-id="@entry.Id" method="get">
                                     @Html.AntiForgeryToken()
-                                    <button type="submit" class="btn btn-primary">Изменить</button>
+                                    <button type="submit" class="default-button">
+                                        <span class="material-icons">edit</span>
+                                    </button>
                                 </form>
                                 <form asp-action="Delete" asp-route-id="@entry.Id" method="post">
                                     @Html.AntiForgeryToken()
-                                    <button type="submit" class="btn btn-danger">Удалить</button>
+                                    <button type="submit" class="default-button">
+                                        <span class="material-icons">clear</span>
+                                    </button>
                                 </form>
                             </div>
                         </td>
