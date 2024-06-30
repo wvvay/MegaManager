@@ -7,7 +7,7 @@ namespace MegaManager.Utilities
     public class Cypher
     {
 
-        private byte[] salt = new byte[] { 0x26, 0xdc, 0x1f, 0x2a, 0x38, 0x40, 0xad, 0x21 };
+        private byte[] salt = [0x26, 0xdc, 0x1f, 0x2a, 0x38, 0x40, 0xad, 0x21];
 
         // Метод для генерации ключа из мастер-пароля
         private byte[] GenerateKey(string password)

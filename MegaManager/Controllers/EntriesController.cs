@@ -17,6 +17,7 @@ namespace MegaManager.Controllers
         private readonly ILogger<EntriesController> _logger;
         private readonly IHttpContextAccessor _httpContextAccessor; // Add IHttpContextAccessor for session
         Cypher cipher = new Cypher();
+        private bool IsSetWord = false;
         public EntriesController(DBContextMegaManager context, UserManager<ApplicationUser> userManager, 
             ILogger<EntriesController> logger, IHttpContextAccessor httpContextAccessor)
         {
@@ -24,7 +25,6 @@ namespace MegaManager.Controllers
             _userManager = userManager;
             _logger = logger;
             _httpContextAccessor = httpContextAccessor;
-
         }
 
         // GET: Entries/SecretWord
@@ -32,32 +32,6 @@ namespace MegaManager.Controllers
         public IActionResult SecretWord()
         {
             return View();
-        }
-
-        // POST: Entries/VerifySecretWord
-        [AllowAnonymous] // Allow access to this action without authentication
-        [HttpPost]
-        public IActionResult VerifySecretWord(string secretWord)
-        {
-            // Проверка на наличие значения secretWord
-            if (string.IsNullOrWhiteSpace(secretWord))
-            {
-                TempData["ErrorMessage"] = "Необходимо ввести Мастер-пароль";
-                return RedirectToAction("SecretWord");
-            }
-
-            // Проверка на разрешённые символы (только буквы, цифры и некоторые специальные символы)
-            // Можно настроить регулярное выражение для других требований
-            string allowedPattern = @"^[a-zA-Z0-9!@#$%^&*()-=_+[\]{};':""|,.<>?\/\s]*$";
-            if (!Regex.IsMatch(secretWord, allowedPattern))
-            {
-                TempData["ErrorMessage"] = "Недопустимые символы в Мастер-пароле";
-                return RedirectToAction("SecretWord");
-            }
-
-            // Действие, если секретное слово прошло валидацию
-            _httpContextAccessor.HttpContext.Session.SetString("SecretWord", secretWord);
-            return RedirectToAction("Index");
         }
 
         // GET: Entries
@@ -71,7 +45,7 @@ namespace MegaManager.Controllers
             // Дешифруем пароли
             foreach (var entry in entries)
             {
-                entry.Password = cipher.Decrypt(entry.Password, secretWord); // Замените "YourMasterPassword" на реальный мастер-пароль
+                entry.Password = cipher.Decrypt(entry.Password, secretWord); 
             }
 
             return View(entries);
@@ -80,6 +54,10 @@ namespace MegaManager.Controllers
         // GET: Entries/Create
         public IActionResult Create()
         {
+            if (!IsSetWord)
+            {
+                return RedirectToAction("SecretWord");
+            }
             return View();
         }
 
@@ -110,6 +88,33 @@ namespace MegaManager.Controllers
                 _logger.LogError(ex, "Error occurred while deleting entity with ID {Id}.", id);
                 return NotFound();
             }
+        }
+
+        // POST: Entries/VerifySecretWord
+        [AllowAnonymous] // Allow access to this action without authentication
+        [HttpPost]
+        public IActionResult VerifySecretWord(string secretWord)
+        {
+            // Проверка на наличие значения secretWord
+            if (string.IsNullOrWhiteSpace(secretWord))
+            {
+                TempData["ErrorMessage"] = "Необходимо ввести Мастер-пароль";
+                return RedirectToAction("SecretWord");
+            }
+
+            // Проверка на разрешённые символы (только буквы, цифры и некоторые специальные символы)
+            // Можно настроить регулярное выражение для других требований
+            string allowedPattern = @"^[a-zA-Z0-9!@#$%^&*()-=_+[\]{};':""|,.<>?\/\s]*$";
+            if (!Regex.IsMatch(secretWord, allowedPattern))
+            {
+                TempData["ErrorMessage"] = "Недопустимые символы в Мастер-пароле";
+                return RedirectToAction("SecretWord");
+            }
+
+            // Действие, если секретное слово прошло валидацию
+            IsSetWord = true;
+            _httpContextAccessor.HttpContext.Session.SetString("SecretWord", secretWord);
+            return RedirectToAction("Index");
         }
 
         // POST: Entries/Create
