@@ -1,10 +1,11 @@
 ﻿using MegaManager.Areas.Identity.Data;
 using MegaManager.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MegaManager.Utilities;
+using System.Text.RegularExpressions;
 
 namespace MegaManager.Controllers
 {
@@ -15,7 +16,7 @@ namespace MegaManager.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<EntriesController> _logger;
         private readonly IHttpContextAccessor _httpContextAccessor; // Add IHttpContextAccessor for session
-
+        Cypher cipher = new Cypher();
         public EntriesController(DBContextMegaManager context, UserManager<ApplicationUser> userManager, 
             ILogger<EntriesController> logger, IHttpContextAccessor httpContextAccessor)
         {
@@ -38,27 +39,26 @@ namespace MegaManager.Controllers
         [HttpPost]
         public IActionResult VerifySecretWord(string secretWord)
         {
-            // Replace "mySecretWord" with your actual secret word
-            if (secretWord != null)
+            // Проверка на наличие значения secretWord
+            if (string.IsNullOrWhiteSpace(secretWord))
             {
-                _httpContextAccessor.HttpContext.Session.SetString("SecretWord", secretWord);
-                // Redirect to the Entries/Index action upon successful verification
-                return RedirectToAction("Index");
-            }
-            else
-            {
-                // Redirect back to the SecretWord view with an error message
-                TempData["ErrorMessage"] = "Incorrect secret word.";
+                TempData["ErrorMessage"] = "Необходимо ввести Мастер-пароль";
                 return RedirectToAction("SecretWord");
             }
+
+            // Проверка на разрешённые символы (только буквы, цифры и некоторые специальные символы)
+            // Можно настроить регулярное выражение для других требований
+            string allowedPattern = @"^[a-zA-Z0-9!@#$%^&*()-=_+[\]{};':""|,.<>?\/\s]*$";
+            if (!Regex.IsMatch(secretWord, allowedPattern))
+            {
+                TempData["ErrorMessage"] = "Недопустимые символы в Мастер-пароле";
+                return RedirectToAction("SecretWord");
+            }
+
+            // Действие, если секретное слово прошло валидацию
+            _httpContextAccessor.HttpContext.Session.SetString("SecretWord", secretWord);
+            return RedirectToAction("Index");
         }
-
-
-
-
-
-
-
 
         // GET: Entries
         public async Task<IActionResult> Index()
@@ -68,6 +68,11 @@ namespace MegaManager.Controllers
             var secretWord = _httpContextAccessor.HttpContext.Session.GetString("SecretWord");
             _logger.LogWarning(secretWord);
 
+            // Дешифруем пароли
+            foreach (var entry in entries)
+            {
+                entry.Password = cipher.Decrypt(entry.Password, secretWord); // Замените "YourMasterPassword" на реальный мастер-пароль
+            }
 
             return View(entries);
         }
@@ -95,6 +100,8 @@ namespace MegaManager.Controllers
                     _logger.LogWarning("UserId {Id} trying delete foreign entry", _userManager.GetUserId(User));
                     return NotFound();
                 }
+                var secretWord = _httpContextAccessor.HttpContext.Session.GetString("SecretWord");
+                entry.Password = cipher.Decrypt(entry.Password, secretWord);
 
                 return View(entry);
             }
@@ -112,6 +119,9 @@ namespace MegaManager.Controllers
         {
             try
             {
+                var secretWord = _httpContextAccessor.HttpContext.Session.GetString("SecretWord");
+                entry.Password = cipher.Encrypt(entry.Password, secretWord);
+
                 entry.IdUser = _userManager.GetUserId(User);
                 _context.Add(entry);
                 await _context.SaveChangesAsync();
@@ -133,6 +143,9 @@ namespace MegaManager.Controllers
         {
             try
             {
+                var secretWord = _httpContextAccessor.HttpContext.Session.GetString("SecretWord");
+                entry.Password = cipher.Decrypt(entry.Password, secretWord);
+
                 entry.IdUser = _userManager.GetUserId(User);
                 _context.Update(entry);
                 await _context.SaveChangesAsync();
