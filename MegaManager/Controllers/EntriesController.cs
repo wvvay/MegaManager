@@ -54,6 +54,9 @@ namespace MegaManager.Controllers
             return View(entry);
         }
 
+
+
+
         // POST: Entries/Delete
         [HttpPost]
         [ValidateAntiForgeryToken]

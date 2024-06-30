@@ -76,6 +76,12 @@
             transform: translateX(-50%) translateY(0);
             transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
         }
+
+    .form-container {
+        display: flex;
+        justify-content: space-evenly;
+    }
+
 </style>
 
 
@@ -120,10 +126,16 @@
                             <span>@entry.Notes</span>
                         </td>
                         <td class="table-column">
-                            <form asp-action="Delete" asp-route-id="@entry.Id" method="post">
-                                @Html.AntiForgeryToken()
-                                <button type="submit" class="btn btn-danger">Удалить</button>
-                            </form>
+                            <div class="form-container">
+                                <form asp-action="Update" asp-route-id="@entry.Id" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-primary">Изменить</button>
+                                </form>
+                                <form asp-action="Delete" asp-route-id="@entry.Id" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-danger">Удалить</button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                 }
