@@ -1,6 +1,7 @@
 ﻿using MegaManager.Areas.Identity.Data;
 using MegaManager.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,19 +14,61 @@ namespace MegaManager.Controllers
         private readonly DBContextMegaManager _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<EntriesController> _logger;
+        private readonly IHttpContextAccessor _httpContextAccessor; // Add IHttpContextAccessor for session
 
-        public EntriesController(DBContextMegaManager context, UserManager<ApplicationUser> userManager, ILogger<EntriesController> logger)
+        public EntriesController(DBContextMegaManager context, UserManager<ApplicationUser> userManager, 
+            ILogger<EntriesController> logger, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
             _userManager = userManager;
             _logger = logger;
+            _httpContextAccessor = httpContextAccessor;
+
         }
+
+        // GET: Entries/SecretWord
+        [AllowAnonymous] // Allow access to this action without authentication
+        public IActionResult SecretWord()
+        {
+            return View();
+        }
+
+        // POST: Entries/VerifySecretWord
+        [AllowAnonymous] // Allow access to this action without authentication
+        [HttpPost]
+        public IActionResult VerifySecretWord(string secretWord)
+        {
+            // Replace "mySecretWord" with your actual secret word
+            if (secretWord != null)
+            {
+                _httpContextAccessor.HttpContext.Session.SetString("SecretWord", secretWord);
+                // Redirect to the Entries/Index action upon successful verification
+                return RedirectToAction("Index");
+            }
+            else
+            {
+                // Redirect back to the SecretWord view with an error message
+                TempData["ErrorMessage"] = "Incorrect secret word.";
+                return RedirectToAction("SecretWord");
+            }
+        }
+
+
+
+
+
+
+
 
         // GET: Entries
         public async Task<IActionResult> Index()
         {
             var userId = _userManager.GetUserId(User);
             var entries = await _context.Entries.Where(e => e.IdUser == userId).ToListAsync();
+            var secretWord = _httpContextAccessor.HttpContext.Session.GetString("SecretWord");
+            _logger.LogWarning(secretWord);
+
+
             return View(entries);
         }
 
