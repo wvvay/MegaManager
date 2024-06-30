@@ -28,10 +28,38 @@ namespace MegaManager.Controllers
             var entries = await _context.Entries.Where(e => e.IdUser == userId).ToListAsync();
             return View(entries);
         }
+
         // GET: Entries/Create
         public IActionResult Create()
         {
             return View();
+        }
+
+        // GET: Entries/Update
+        public async Task<IActionResult> Update(int id)
+        {
+            try
+            {
+                var entry = await _context.Entries.FindAsync(id);
+                if (entry == null)
+                {
+                    _logger.LogWarning("Entity with ID {Id} not found.", id);
+                    return NotFound();
+                }
+
+                if (entry.IdUser != _userManager.GetUserId(User))
+                {
+                    _logger.LogWarning("UserId {Id} trying delete foreign entry", _userManager.GetUserId(User));
+                    return NotFound();
+                }
+
+                return View(entry);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while deleting entity with ID {Id}.", id);
+                return NotFound();
+            }
         }
 
         // POST: Entries/Create
@@ -54,6 +82,26 @@ namespace MegaManager.Controllers
             return View(entry);
         }
 
+
+        // POST: Entries/Update
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Update(Entry entry)
+        {
+            try
+            {
+                entry.IdUser = _userManager.GetUserId(User);
+                _context.Update(entry);
+                await _context.SaveChangesAsync();
+                _logger.LogInformation("Entry updated successfully.");
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while saving the entry.");
+            }
+            return View(entry);
+        }
 
 
 

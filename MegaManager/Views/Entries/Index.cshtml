@@ -127,7 +127,7 @@
                         </td>
                         <td class="table-column">
                             <div class="form-container">
-                                <form asp-action="Update" asp-route-id="@entry.Id" method="post">
+                                <form asp-action="Update" asp-route-id="@entry.Id" method="get">
                                     @Html.AntiForgeryToken()
                                     <button type="submit" class="btn btn-primary">Изменить</button>
                                 </form>
