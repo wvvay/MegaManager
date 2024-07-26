@@ -1,0 +1,293 @@
+﻿@model IEnumerable<Entry>
+@{
+
+}
+
+<style>
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        table-layout: auto;
+        margin: 0 auto;
+        display: table;
+    }
+
+    th, td {
+        min-width: 20%;
+        padding: 8px;
+        text-align: left;
+        vertical-align: top;
+    }
+
+    th {
+        background-color: #f2f2f2;
+        vertical-align: middle;
+    }
+
+    .default-button,
+    .table-button {
+        background: none;
+        border: none;
+        cursor: pointer;
+    }
+
+    .table-button {
+        text-align: right;
+    }
+
+    .table-column{
+        text-align: right;
+    }
+
+    .search-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .search-input {
+        padding: 8px;
+        font-size: 16px;
+        margin-right: 10px;
+    }
+
+    .notification {
+        visibility: hidden;
+        min-width: 250px;
+        background-color: #333;
+        color: #fff;
+        text-align: center;
+        border-radius: 2px;
+        padding: 16px;
+        position: fixed;
+        z-index: 1;
+        top: 20px; /* Отступ сверху */
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 17px;
+        opacity: 0;
+        transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+    }
+
+    .notification.show {
+        visibility: visible;
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+        transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+    }
+
+    .form-container {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .material-icons {
+        font-family: 'Material Icons';
+        font-weight: normal;
+        font-style: normal;
+        font-size: 24px; /* Preferred icon size */
+        display: inline-block;
+        line-height: 1;
+        text-transform: none;
+        letter-spacing: normal;
+        word-wrap: normal;
+        white-space: nowrap;
+        direction: ltr;
+        /* Support for all WebKit browsers. */
+        -webkit-font-smoothing: antialiased;
+        /* Support for Safari and Chrome. */
+        text-rendering: optimizeLegibility;
+        /* Support for Firefox. */
+        -moz-osx-font-smoothing: grayscale;
+        /* Support for IE. */
+        font-feature-settings: 'liga';
+    }
+
+</style>
+
+
+<body>
+    <div style="text-align: center;">
+        <div class="search-container">
+            <input type="text" id="searchInput" class="search-input" onkeyup="filterTable()" placeholder="Поиск по сайту...">
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>
+                        <button class="default-button" onclick="sortTable(0)">
+                            Сайт <span id="sortIcon">&#9650;</span> <!-- Значок сортировки -->
+                        </button>
+                    </th>
+                    <th>Логин</th>
+                    <th>Пароль</th>
+                    <th>Заметка</th>
+                    <th class="table-column">
+                        <div>
+                            <a class="btn btn-primary" asp-action="Create">Добавить</a>
+                        </div>
+                    </th>
+                </tr>
+            </thead>
+
+            <tbody id="tableBody">
+                @foreach (var entry in Model)
+                {
+                    <tr>
+                        <td onclick="copyText(this)">
+                            <span>@entry.URL</span>
+                        </td>
+                        <td onclick="copyText(this)">
+                            <span>@entry.Login</span>
+                        </td>
+                        <td onclick="copyText(this)">
+                            <span>@entry.Password</span>
+                        </td>
+                        <td onclick="copyText(this)" style="max-width: 20vw; word-wrap: break-word;">
+                            <span>@entry.Notes</span>
+                        </td>
+                        <td class="table-column">
+                            <div class="form-container">
+                                
+                                <form asp-action="Update" asp-route-id="@entry.Id" method="get">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="default-button">
+                                        <span class="material-icons">edit</span>
+                                    </button>
+                                </form>
+                                <form asp-action="Delete" asp-route-id="@entry.Id" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="default-button">
+                                        <span class="material-icons">clear</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </>
+        </table>
+    </div>
+    <div id="copyNotification" class="notification">Скопировано!</div>
+</body>
+
+<script>
+    function copyText(cell) {
+        var textToCopy = cell.textContent.trim();
+
+        // Создаем временный элемент ввода
+        var tempInput = document.createElement("input");
+        tempInput.value = textToCopy;
+        document.body.appendChild(tempInput);
+
+        // Выделяем текст в временном элементе ввода
+        tempInput.select();
+        tempInput.setSelectionRange(0, 99999); // Для мобильных устройств
+
+        // Копируем текст в буфер обмена
+        document.execCommand("copy");
+
+        // Удаляем временный элемент ввода
+        document.body.removeChild(tempInput);
+
+        // Показываем всплывающее уведомление
+        var notification = document.getElementById("copyNotification");
+        notification.classList.add("show");
+        setTimeout(function () {
+            notification.classList.remove("show");
+        }, 2500); // Уведомление исчезает через 2.5 секунды
+    }
+    // function copyText(button, type) {
+    //     var cell = button.parentElement; // Get the parent <td> of the clicked button
+    //     var textElement = cell.querySelector("span"); // Find the <span> within the <td>
+    //     var textToCopy = textElement.innerText.trim(); // Get the text content and trim any whitespace
+
+    //     // Create a temporary input element
+    //     var tempInput = document.createElement("input");
+    //     tempInput.value = textToCopy;
+    //     document.body.appendChild(tempInput);
+
+    //     // Select the text in the temporary input element
+    //     tempInput.select();
+    //     tempInput.setSelectionRange(0, 99999); // For mobile devices
+
+    //     // Copy the text to the clipboard
+    //     document.execCommand("copy");
+
+    //     // Remove the temporary input element
+    //     document.body.removeChild(tempInput);
+    // }
+    // function copyText(cell) {
+    //     var textToCopy = cell.textContent.trim();
+
+    //     // Создаем временный элемент ввода
+    //     var tempInput = document.createElement("input");
+    //     tempInput.value = textToCopy;
+    //     document.body.appendChild(tempInput);
+
+    //     // Выделяем текст в временном элементе ввода
+    //     tempInput.select();
+    //     tempInput.setSelectionRange(0, 99999); // Для мобильных устройств
+
+    //     // Копируем текст в буфер обмена
+    //     document.execCommand("copy");
+
+    //     // Удаляем временный элемент ввода
+    //     document.body.removeChild(tempInput);
+
+    //     // Можно добавить оповещение или визуальное подтверждение копирования
+    //     alert("Скопировано: " + textToCopy);
+    // }
+
+    let sortOrder = 1;
+
+    function sortTable(columnIndex) {
+        const table = document.querySelector("table tbody");
+        const rows = Array.from(table.rows);
+
+        rows.sort((a, b) => {
+            const aText = a.cells[columnIndex].innerText.trim();
+            const bText = b.cells[columnIndex].innerText.trim();
+
+            return aText.localeCompare(bText) * sortOrder;
+        });
+
+        // Toggle the sort order for next click
+        sortOrder = -sortOrder;
+
+        // Update the sort icon
+        const sortIcon = document.getElementById("sortIcon");
+        if (sortOrder === 1) {
+            sortIcon.innerHTML = "&#9650;"; // Up arrow
+        } else {
+            sortIcon.innerHTML = "&#9660;"; // Down arrow
+        }
+
+        // Clear and append sorted rows
+        table.innerHTML = "";
+        rows.forEach(row => table.appendChild(row));
+    }
+    function filterTable() {
+        const input = document.getElementById("searchInput");
+        const filter = input.value.toLowerCase();
+        const table = document.getElementById("tableBody");
+        const rows = table.getElementsByTagName("tr");
+
+        for (let i = 0; i < rows.length; i++) {
+            const cells = rows[i].getElementsByTagName("td");
+            const siteCell = cells[0]; // Сайт находится в первом столбце
+
+            if (siteCell) {
+                const siteText = siteCell.textContent || siteCell.innerText;
+                if (siteText.toLowerCase().indexOf(filter) > -1) {
+                    rows[i].style.display = "";
+                } else {
+                    rows[i].style.display = "none";
+                }
+            }
+        }
+    }
+
+</script>
