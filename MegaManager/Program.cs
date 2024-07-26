@@ -3,7 +3,8 @@ using Microsoft.EntityFrameworkCore;
 
 
 var builder = WebApplication.CreateBuilder(args);
-var connectionString = builder.Configuration.GetConnectionString("DBContextMegaManagerConnection") ?? throw new InvalidOperationException("Connection string 'DBContextMegaManagerConnection' not found.");
+var connectionString = builder.Configuration.GetConnectionString("DBContextMegaManagerConnection") 
+    ?? throw new InvalidOperationException("Connection string 'DBContextMegaManagerConnection' not found.");
 
 builder.Services.AddDbContext<DBContextMegaManager>(options => options.UseNpgsql(connectionString));
 

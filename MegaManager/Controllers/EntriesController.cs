@@ -17,7 +17,21 @@ namespace MegaManager.Controllers
         private readonly ILogger<EntriesController> _logger;
         private readonly IHttpContextAccessor _httpContextAccessor; // Add IHttpContextAccessor for session
         Cypher cipher = new Cypher();
-        private bool IsSetWord = false;
+        //private bool IsSetWord = false;
+
+        private bool IsSetWord
+        {
+            get
+            {
+                var isSetWord = _httpContextAccessor.HttpContext.Session.GetString("IsSetWord");
+                return isSetWord != null && bool.Parse(isSetWord);
+            }
+            set
+            {
+                _httpContextAccessor.HttpContext.Session.SetString("IsSetWord", value.ToString());
+            }
+        }
+
         public EntriesController(DBContextMegaManager context, UserManager<ApplicationUser> userManager, 
             ILogger<EntriesController> logger, IHttpContextAccessor httpContextAccessor)
         {
@@ -42,6 +56,8 @@ namespace MegaManager.Controllers
             var secretWord = _httpContextAccessor.HttpContext.Session.GetString("SecretWord");
             _logger.LogWarning(secretWord);
 
+            if (secretWord == null) { return RedirectToAction("SecretWord"); }
+
             // Дешифруем пароли
             foreach (var entry in entries)
             {
@@ -50,6 +66,7 @@ namespace MegaManager.Controllers
 
             return View(entries);
         }
+
 
         // GET: Entries/Create
         public IActionResult Create()
@@ -149,7 +166,7 @@ namespace MegaManager.Controllers
             try
             {
                 var secretWord = _httpContextAccessor.HttpContext.Session.GetString("SecretWord");
-                entry.Password = cipher.Decrypt(entry.Password, secretWord);
+                entry.Password = cipher.Encrypt(entry.Password, secretWord);
 
                 entry.IdUser = _userManager.GetUserId(User);
                 _context.Update(entry);
