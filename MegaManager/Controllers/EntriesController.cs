@@ -61,8 +61,14 @@ namespace MegaManager.Controllers
             // Дешифруем пароли
             foreach (var entry in entries)
             {
-                entry.Password = cipher.Decrypt(entry.Password, secretWord); 
+                if (cipher.Decrypt(entry.Password, secretWord) == "Неправильно подобран Мастер-пароль")
+                {
+                    TempData["ErrorMessage"] = "Неправильно подобран Мастер-пароль";
+                    return RedirectToAction("SecretWord");
+                }
+                entry.Password = cipher.Decrypt(entry.Password, secretWord);
             }
+            
 
             return View(entries);
         }
@@ -127,6 +133,8 @@ namespace MegaManager.Controllers
                 TempData["ErrorMessage"] = "Недопустимые символы в Мастер-пароле";
                 return RedirectToAction("SecretWord");
             }
+
+
 
             // Действие, если секретное слово прошло валидацию
             IsSetWord = true;
